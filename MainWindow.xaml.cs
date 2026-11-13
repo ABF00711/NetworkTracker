@@ -40,6 +40,8 @@ public partial class MainWindow : Window
     private double _dockDragLeft;
     private double _dockDragTop;
     private int _taskbarCreatedMessage;
+    private int _shellHookMessage;
+    private bool _userHid;
 
     internal MainWindow(AppSettings settings, BandwidthMonitor bandwidth, PingMonitor ping)
     {
@@ -50,12 +52,8 @@ public partial class MainWindow : Window
         InitializeComponent();
         Width = Math.Clamp(settings.Width, MinWidth, 720);
 
-        _dockFollow = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
-        _dockFollow.Tick += (_, _) =>
-        {
-            if (_settings.Docked && !_dockDrag && !_resizing)
-                SnapToTaskbar();
-        };
+        _dockFollow = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
+        _dockFollow.Tick += (_, _) => FollowTaskbar();
 
         _bandwidth.Sampled += OnSampled;
         _ping.Updated += OnPing;
@@ -131,11 +129,28 @@ public partial class MainWindow : Window
         SettingsService.Save(_settings);
     }
 
+    public void ShowFromUser()
+    {
+        _userHid = false;
+        EnsureOnScreen();
+        if (!IsVisible)
+            Show();
+        Opacity = 1;
+        RaiseAboveTaskbar();
+    }
+
+    public void HideFromUser()
+    {
+        _userHid = true;
+        Hide();
+    }
+
     public void EnsureOnScreen()
     {
         if (_settings.Docked)
         {
             SnapToTaskbar();
+            RaiseAboveTaskbar();
             return;
         }
 
@@ -163,6 +178,7 @@ public partial class MainWindow : Window
         if (!_allowClose)
         {
             e.Cancel = true;
+            _userHid = true;
             Hide();
             return;
         }
@@ -176,9 +192,19 @@ public partial class MainWindow : Window
         IntPtr hwnd = new WindowInteropHelper(this).Handle;
         NativeMethods.MakeToolWindow(hwnd);
         _taskbarCreatedMessage = NativeMethods.RegisterWindowMessage("TaskbarCreated");
+        _shellHookMessage = NativeMethods.RegisterWindowMessage("SHELLHOOK");
+        NativeMethods.RegisterShellHookWindow(hwnd);
 
         if (PresentationSource.FromVisual(this) is HwndSource source)
             source.AddHook(WndProc);
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        IntPtr hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd != IntPtr.Zero)
+            NativeMethods.DeregisterShellHookWindow(hwnd);
+        base.OnClosed(e);
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -269,6 +295,29 @@ public partial class MainWindow : Window
             previous.Child = null;
 
         host.Child = Graph;
+    }
+
+    private void FollowTaskbar()
+    {
+        if (!_settings.Docked || _userHid || _dockDrag || _resizing)
+            return;
+
+        if (!IsVisible)
+        {
+            Show();
+            Opacity = 1;
+        }
+
+        SnapToTaskbar();
+        RaiseAboveTaskbar();
+    }
+
+    private void RaiseAboveTaskbar()
+    {
+        if (!_settings.Docked || _userHid || !IsVisible)
+            return;
+
+        NativeMethods.RaiseAboveTaskbar(new WindowInteropHelper(this).Handle);
     }
 
     private void SnapToTaskbar()
@@ -611,13 +660,20 @@ public partial class MainWindow : Window
             return (IntPtr)NativeMethods.MaNoActivate;
         }
 
+        if (_shellHookMessage != 0 && msg == _shellHookMessage)
+        {
+            int code = wParam.ToInt32() & 0x7FFF;
+            if (code is 3 or 4 or 7)
+                RaiseAboveTaskbar();
+        }
+
         if (msg == 0x001A && _settings.Docked)
-            Dispatcher.BeginInvoke(new Action(SnapToTaskbar));
+            Dispatcher.BeginInvoke(new Action(FollowTaskbar));
 
         if (_taskbarCreatedMessage != 0 && msg == _taskbarCreatedMessage)
         {
             if (_settings.Docked)
-                Dispatcher.BeginInvoke(new Action(SnapToTaskbar));
+                Dispatcher.BeginInvoke(new Action(FollowTaskbar));
             TaskbarRecreated?.Invoke(this, EventArgs.Empty);
         }
 

@@ -24,14 +24,48 @@ internal static class NativeMethods
         SendMessage(hwnd, WmNcLButtonDown, (IntPtr)HtCaption, IntPtr.Zero);
     }
 
+    /// <summary>
+    /// The taskbar is topmost too. A click on it paints the bar over this window.
+    /// Putting the window back at the top of the topmost band keeps the strip visible.
+    /// </summary>
+    public static void RaiseAboveTaskbar(IntPtr hwnd)
+    {
+        if (hwnd == IntPtr.Zero)
+            return;
+
+        uint flags = SwpNoMove | SwpNoSize | SwpNoActivate;
+        if (!IsWindowVisible(hwnd))
+            flags |= SwpShowWindow;
+
+        SetWindowPos(hwnd, HwndTopmost, 0, 0, 0, 0, flags);
+    }
+
+    [DllImport("user32.dll")]
+    public static extern bool RegisterShellHookWindow(IntPtr hwnd);
+
+    [DllImport("user32.dll")]
+    public static extern bool DeregisterShellHookWindow(IntPtr hwnd);
+
     [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     public static extern int RegisterWindowMessage(string lpString);
 
     [DllImport("user32.dll")]
     private static extern bool ReleaseCapture();
 
+    private static readonly IntPtr HwndTopmost = new(-1);
+    private const uint SwpNoMove = 0x0002;
+    private const uint SwpNoSize = 0x0001;
+    private const uint SwpNoActivate = 0x0010;
+    private const uint SwpShowWindow = 0x0040;
+
+    [DllImport("user32.dll")]
+    private static extern bool IsWindowVisible(IntPtr hWnd);
+
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
     private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint flags);
 
     private static IntPtr GetExStyle(IntPtr hwnd) =>
         IntPtr.Size == 8 ? GetWindowLongPtr64(hwnd, GwlExStyle) : (IntPtr)GetWindowLong32(hwnd, GwlExStyle);

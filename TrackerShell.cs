@@ -78,18 +78,12 @@ internal sealed class TrackerShell : IDisposable
         }
     }
 
-    private void ShowWindow()
-    {
-        _window.EnsureOnScreen();
-        if (!_window.IsVisible)
-            _window.Show();
-        _window.Opacity = 1;
-    }
+    private void ShowWindow() => _window.ShowFromUser();
 
     private void ToggleWindow()
     {
         if (_window.IsVisible)
-            _window.Hide();
+            _window.HideFromUser();
         else
             ShowWindow();
     }
