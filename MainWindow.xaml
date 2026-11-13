@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:NetworkTracker"
         Title="NetworkTracker"
+        Icon="AppIcon.ico"
         Width="300"
         MinWidth="220"
         MaxWidth="1400"
