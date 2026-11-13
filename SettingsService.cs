@@ -33,6 +33,10 @@ internal static class SettingsService
 
             if (double.IsNaN(settings.Width) || settings.Width < 220 || settings.Width > 720)
                 settings.Width = 300;
+            if (double.IsNaN(settings.DockedWidth) || settings.DockedWidth < 200 || settings.DockedWidth > 1400)
+                settings.DockedWidth = 420;
+            if (double.IsNaN(settings.DockedInset) || settings.DockedInset < 0)
+                settings.DockedInset = 0;
 
             return settings;
         }

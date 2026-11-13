@@ -135,6 +135,7 @@ internal sealed class TrackerShell : IDisposable
         }
 
         _menu.Items.Add(_window.IsVisible ? "Hide window" : "Show window", null, (_, _) => ToggleWindow());
+        _menu.Items.Add(CheckItem("Dock to taskbar", _settings.Docked, value => _window.SetDocked(value)));
 
         var adapterMenu = new Forms.ToolStripMenuItem("Adapter");
         string? automaticName = AdapterCatalog.Resolve(null)?.Name;

@@ -20,5 +20,12 @@ public sealed class AppSettings
 
     public double Width { get; set; } = 300;
 
+    public bool Docked { get; set; }
+
+    public double DockedWidth { get; set; } = 420;
+
+    /// <summary>Distance from the tray edge, so the strip stays beside the clock.</summary>
+    public double DockedInset { get; set; }
+
     public bool StartWithWindows { get; set; }
 }

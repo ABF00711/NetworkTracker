@@ -4,8 +4,8 @@
         xmlns:controls="clr-namespace:NetworkTracker"
         Title="NetworkTracker"
         Width="300"
-        MinWidth="240"
-        MaxWidth="720"
+        MinWidth="220"
+        MaxWidth="1400"
         SizeToContent="Height"
         WindowStartupLocation="Manual"
         WindowStyle="None"
@@ -21,68 +21,109 @@
         TextOptions.TextRenderingMode="ClearType"
         FontFamily="Segoe UI"
         MouseLeftButtonDown="Root_MouseLeftButtonDown"
+        MouseLeftButtonUp="Root_MouseLeftButtonUp"
+        MouseMove="Root_MouseMove"
         MouseRightButtonUp="Root_MouseRightButtonUp">
     <Window.Resources>
         <Style TargetType="TextBlock">
             <Setter Property="Cursor" Value="Arrow" />
         </Style>
     </Window.Resources>
-    <Border BorderBrush="#C5CAD0" BorderThickness="1" Background="White" Cursor="Arrow">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+    <Grid>
+        <Border x:Name="Card" BorderBrush="#C5CAD0" BorderThickness="1" Background="White" Cursor="Arrow">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-            <controls:SpeedGraph x:Name="Graph" Height="74" />
+                <Border x:Name="CardGraphHost" Grid.Row="0" Height="74">
+                    <controls:SpeedGraph x:Name="Graph" />
+                </Border>
 
-            <Border x:Name="SpeedRow" Grid.Row="1" BorderBrush="#E6E8EB" BorderThickness="0,1,0,0" Background="#F7F9FB">
-                <Grid Height="30">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="1" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="↓" Foreground="#2F89FF" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
-                        <TextBlock x:Name="DownText" Margin="6,0,0,0" VerticalAlignment="Center"
-                                   Foreground="#202124" FontSize="13"
-                                   Typography.NumeralAlignment="Tabular"
-                                   Text="… Mbps" />
-                    </StackPanel>
-                    <Rectangle Grid.Column="1" Fill="#E6E8EB" />
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="↑" Foreground="#F26B1D" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
-                        <TextBlock x:Name="UpText" Margin="6,0,0,0" VerticalAlignment="Center"
-                                   Foreground="#202124" FontSize="13"
-                                   Typography.NumeralAlignment="Tabular"
-                                   Text="… Mbps" />
-                    </StackPanel>
-                </Grid>
-            </Border>
+                <Border x:Name="SpeedRow" Grid.Row="1" BorderBrush="#E6E8EB" BorderThickness="0,1,0,0" Background="#F7F9FB">
+                    <Grid Height="30">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="1" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="↓" Foreground="#2F89FF" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock x:Name="DownText" Margin="6,0,0,0" VerticalAlignment="Center"
+                                       Foreground="#202124" FontSize="13"
+                                       Typography.NumeralAlignment="Tabular"
+                                       Text="… Mbps" />
+                        </StackPanel>
+                        <Rectangle Grid.Column="1" Fill="#E6E8EB" />
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="↑" Foreground="#F26B1D" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock x:Name="UpText" Margin="6,0,0,0" VerticalAlignment="Center"
+                                       Foreground="#202124" FontSize="13"
+                                       Typography.NumeralAlignment="Tabular"
+                                       Text="… Mbps" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
 
-            <Border x:Name="PingRow" Grid.Row="2" BorderBrush="#E6E8EB" BorderThickness="0,1,0,0" Background="White">
-                <Grid Height="24">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="1" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="GoogleText" HorizontalAlignment="Center" VerticalAlignment="Center"
-                               FontSize="11" Foreground="#5F6368" Text="Google  …" />
-                    <Rectangle Grid.Column="1" Fill="#E6E8EB" />
-                    <TextBlock x:Name="BaiduText" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center"
-                               FontSize="11" Foreground="#5F6368" Text="Baidu  …" />
-                </Grid>
-            </Border>
+                <Border x:Name="PingRow" Grid.Row="2" BorderBrush="#E6E8EB" BorderThickness="0,1,0,0" Background="White">
+                    <Grid Height="24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="1" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="GoogleText" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   FontSize="11" Foreground="#5F6368" Text="Google  …" />
+                        <Rectangle Grid.Column="1" Fill="#E6E8EB" />
+                        <TextBlock x:Name="BaiduText" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   FontSize="11" Foreground="#5F6368" Text="Baidu  …" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
 
-            <Rectangle x:Name="Grip" Grid.RowSpan="3" Width="6" HorizontalAlignment="Right"
-                       Fill="Transparent" Cursor="SizeWE"
-                       MouseLeftButtonDown="Grip_MouseLeftButtonDown"
-                       MouseMove="Grip_MouseMove"
-                       MouseLeftButtonUp="Grip_MouseLeftButtonUp"
-                       LostMouseCapture="Grip_LostMouseCapture" />
-        </Grid>
-    </Border>
+        <Border x:Name="DockStrip" Visibility="Collapsed" Background="#1C1C1C" Cursor="Arrow" Padding="4,0,8,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="DockGraphColumn" Width="*" />
+                    <ColumnDefinition x:Name="DockDownColumn" Width="Auto" />
+                    <ColumnDefinition x:Name="DockUpColumn" Width="Auto" />
+                    <ColumnDefinition x:Name="DockGoogleColumn" Width="Auto" />
+                    <ColumnDefinition x:Name="DockBaiduColumn" Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border x:Name="DockGraphHost" Grid.Column="0" Margin="0,2,6,2" />
+                <StackPanel x:Name="DockDownPanel" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                    <TextBlock Text="↓" Foreground="#5BA8FF" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock x:Name="DockDownText" Margin="4,0,0,0" VerticalAlignment="Center"
+                               Foreground="#E8EAED" FontSize="11"
+                               Typography.NumeralAlignment="Tabular"
+                               Text="…" />
+                </StackPanel>
+                <StackPanel x:Name="DockUpPanel" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                    <TextBlock Text="↑" Foreground="#FF8A4C" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock x:Name="DockUpText" Margin="4,0,0,0" VerticalAlignment="Center"
+                               Foreground="#E8EAED" FontSize="11"
+                               Typography.NumeralAlignment="Tabular"
+                               Text="…" />
+                </StackPanel>
+                <TextBlock x:Name="DockGoogleText" Grid.Column="3" Margin="0,0,8,0"
+                           VerticalAlignment="Center" Foreground="#E8EAED" FontSize="11"
+                           Typography.NumeralAlignment="Tabular"
+                           Text="G …" />
+                <TextBlock x:Name="DockBaiduText" Grid.Column="4"
+                           VerticalAlignment="Center" Foreground="#E8EAED" FontSize="11"
+                           Typography.NumeralAlignment="Tabular"
+                           Text="B …" />
+            </Grid>
+        </Border>
+
+        <Rectangle x:Name="Grip" Width="6" HorizontalAlignment="Right"
+                   Fill="Transparent" Cursor="SizeWE"
+                   MouseLeftButtonDown="Grip_MouseLeftButtonDown"
+                   MouseMove="Grip_MouseMove"
+                   MouseLeftButtonUp="Grip_MouseLeftButtonUp"
+                   LostMouseCapture="Grip_LostMouseCapture" />
+    </Grid>
 </Window>

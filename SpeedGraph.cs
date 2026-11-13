@@ -11,11 +11,14 @@ public sealed class SpeedGraph : FrameworkElement
     private static readonly SolidColorBrush UpBrush = Freeze(System.Windows.Media.Color.FromRgb(0xFF, 0x5A, 0x36));
     private static readonly SolidColorBrush LabelBrush = Freeze(System.Windows.Media.Color.FromRgb(0x80, 0x86, 0x8B));
     private static readonly SolidColorBrush LabelBackBrush = Freeze(System.Windows.Media.Color.FromArgb(220, 255, 255, 255));
+    private static readonly SolidColorBrush DarkPlotBrush = Freeze(System.Windows.Media.Color.FromRgb(0x1C, 0x1C, 0x1C));
     private static readonly Typeface LabelTypeface = new("Segoe UI");
 
     private IReadOnlyList<ThroughputPoint> _points = Array.Empty<ThroughputPoint>();
     private SpeedUnit _unit = SpeedUnit.Mbps;
     private double _scale = 1;
+    private bool _dark;
+    private bool _showScale = true;
 
     public SpeedGraph()
     {
@@ -48,6 +51,15 @@ public sealed class SpeedGraph : FrameworkElement
         InvalidateVisual();
     }
 
+    internal void SetAppearance(bool dark, bool showScale)
+    {
+        if (_dark == dark && _showScale == showScale)
+            return;
+        _dark = dark;
+        _showScale = showScale;
+        InvalidateVisual();
+    }
+
     protected override System.Windows.Size MeasureOverride(System.Windows.Size availableSize)
     {
         double width = double.IsPositiveInfinity(availableSize.Width) ? 300 : availableSize.Width;
@@ -62,11 +74,11 @@ public sealed class SpeedGraph : FrameworkElement
         if (width < 2 || height < 2)
             return;
 
-        dc.DrawRectangle(PlotBrush, null, new Rect(0, 0, width, height));
+        dc.DrawRectangle(_dark ? DarkPlotBrush : PlotBrush, null, new Rect(0, 0, width, height));
 
         double dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
         double scale = _scale <= 0 ? 1 : _scale;
-        double rightPad = Snap(6, dpi);
+        double rightPad = Snap(_showScale ? 6 : 1, dpi);
         double plotWidth = Math.Max(1, width - rightPad);
         double bottom = Snap(height - 1, dpi);
         double plotHeight = Math.Max(1, bottom - 2);
@@ -84,6 +96,9 @@ public sealed class SpeedGraph : FrameworkElement
             DrawBar(dc, UpBrush, x, bottom, barSlot, HeightOf(up, scale, plotHeight, dpi), dpi);
             x += barSlot;
         }
+
+        if (!_showScale)
+            return;
 
         var label = new FormattedText(
             SpeedFormat.FormatScale(scale, _unit),
